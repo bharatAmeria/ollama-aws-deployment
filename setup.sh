@@ -118,6 +118,9 @@ start_stack() {
     export OLLAMA_MODEL
   fi
 
+  # Tear down any previous run (removes containers, keeps volumes/models)
+  docker compose down --remove-orphans 2>/dev/null || true
+
   docker compose up -d --build
   ok "Stack started."
 }
@@ -133,7 +136,7 @@ pull_model() {
 
   log "Waiting for Ollama to be ready …"
   for i in $(seq 1 30); do
-    if docker exec ollama curl -sf http://localhost:11434/api/tags &>/dev/null; then
+    if docker exec ollama ollama list &>/dev/null; then
       break
     fi
     sleep 2
